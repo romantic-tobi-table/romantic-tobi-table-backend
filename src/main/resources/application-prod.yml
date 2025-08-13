@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:mysql://prod_db_host:3306/tomy_prod_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: prod_user
+    password: prod_password
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+logging:
+  level:
+    root: INFO
+    com.tomy: INFO
