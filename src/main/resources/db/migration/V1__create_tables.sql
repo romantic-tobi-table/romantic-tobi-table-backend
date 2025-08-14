@@ -48,7 +48,7 @@ CREATE TABLE Receipt (
 CREATE TABLE Point_Transaction (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    type VARCHAR(50) NOT NULL, -- ENUM: RECEIPT_EARN, FEED_SPEND, CLOTHES_BUY, REWARD_REDEEM, GREETING_REWARD, ADJUST, LEVELUP_SPEND
+    type VARCHAR(50) NOT NULL, -- ENUM: RECEIPT_EARN, FEED_SPEND, GREETING_REWARD, ADJUST, LEVELUP_SPEND
     amount INT NOT NULL,
     balance_after INT NOT NULL,
     ref_table VARCHAR(32),
@@ -68,26 +68,7 @@ CREATE TABLE Pet (
     FOREIGN KEY (user_id) REFERENCES User(id)
 );
 
--- Clothes Table
-CREATE TABLE Clothes (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    category VARCHAR(255) NOT NULL,
-    price INT NOT NULL,
-    image_url VARCHAR(255) NOT NULL
-);
 
--- UserClothes Table
-CREATE TABLE User_Clothes (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    pet_id BIGINT NOT NULL,
-    clothes_id BIGINT NOT NULL,
-    is_equipped BOOLEAN NOT NULL,
-    purchased_at DATETIME NOT NULL,
-    FOREIGN KEY (pet_id) REFERENCES Pet(id),
-    FOREIGN KEY (clothes_id) REFERENCES Clothes(id),
-    UNIQUE (pet_id, clothes_id)
-);
 
 -- Review Table
 CREATE TABLE Review (
@@ -135,25 +116,3 @@ CREATE TABLE User_Achievement (
     UNIQUE (user_id, achievement_id)
 );
 
--- Reward Table
-CREATE TABLE Reward (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    reward_name VARCHAR(255) NOT NULL,
-    description TEXT,
-    cost_point INT NOT NULL,
-    is_active BOOLEAN NOT NULL,
-    stock INT
-);
-
--- UserReward Table
-CREATE TABLE User_Reward (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    reward_id BIGINT NOT NULL,
-    used BOOLEAN NOT NULL,
-    code VARCHAR(128),
-    issued_at DATETIME NOT NULL,
-    used_at DATETIME,
-    FOREIGN KEY (user_id) REFERENCES User(id),
-    FOREIGN KEY (reward_id) REFERENCES Reward(id)
-);
