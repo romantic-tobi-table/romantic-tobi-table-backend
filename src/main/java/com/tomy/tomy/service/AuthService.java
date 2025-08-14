@@ -1,6 +1,8 @@
 package com.tomy.tomy.service;
 
+import com.tomy.tomy.domain.Pet;
 import com.tomy.tomy.domain.User;
+import com.tomy.tomy.repository.PetRepository;
 import com.tomy.tomy.repository.UserRepository;
 import com.tomy.tomy.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import java.util.Optional;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final PetRepository petRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager; // Added
     private final JwtTokenProvider jwtTokenProvider; // Added
@@ -38,7 +41,18 @@ public class AuthService {
         user.setGender(gender);
         user.setAllowNotification(allowNotification);
         user.setCreatedAt(LocalDateTime.now());
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // Create and save a default Pet for the new user
+        Pet pet = new Pet();
+        pet.setUser(savedUser);
+        pet.setLevel(1);
+        pet.setCurrentPoint(0);
+        pet.setExp(0);
+        pet.setUpdatedAt(LocalDateTime.now());
+        petRepository.save(pet);
+
+        return savedUser;
     }
 
     @Transactional(readOnly = true)
