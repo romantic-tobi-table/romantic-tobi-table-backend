@@ -1,0 +1,19 @@
+# IntelliJ / IDEA
+.idea/
+*.iml
+
+# Gradle
+.gradle/
+build/
+out/
+
+# Logs
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Application Config
+src/main/resources/application.yml
+src/main/resources/application-prod.yml
