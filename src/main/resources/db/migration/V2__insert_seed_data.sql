@@ -32,11 +32,9 @@ VALUES
 INSERT INTO `clothes`
 (id, name, category, price, image_url)
 VALUES
- (4001, '기본 티셔츠', 'TOP',   100,  'https://example.com/clothes/top-basic.png'),
- (4002, '선글라스',     'FACE',  200,  'https://example.com/clothes/face-sunglass.png'),
- (4003, '모자',         'HEAD',  300,  'https://example.com/clothes/head-cap.png'),
- (4004, '신발',         'FOOT',  250,  'https://example.com/clothes/foot-shoes.png');
-
+    (4001, '모자',     'HEAD', 300, 'https://example.com/clothes/head-cap.png'),
+    (4002, '선글라스', 'EYE',  200, 'https://example.com/clothes/eye-sunglass.png'),
+    (4003, '턱수염',   'FACE', 250, 'https://example.com/clothes/face-mustache.png');
 -- 5) PET (user FK, user_id UNIQUE)
 INSERT INTO `pet`
 (id, user_id, level, current_point, exp, updated_at)

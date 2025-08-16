@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/rewards")
@@ -60,11 +61,22 @@ public class RewardController {
     @PostMapping("/{rewardId}/redeem")
     public ResponseEntity<?> redeemReward(@RequestHeader("Authorization") String authorizationHeader,
                                           @PathVariable Long rewardId,
-                                          @RequestBody RedeemRewardRequest request) {
+                                          @RequestBody(required = false) RedeemRewardRequest request) {
         try {
             Long userId = getUserIdFromAuthorization(authorizationHeader);
             UserReward userReward = rewardService.redeemReward(userId, rewardId);
-            return ResponseEntity.ok(new RedeemRewardResponse(userReward.getReward().getId(), userReward.getReward().getRewardName(), userReward.getReward().getCostPoint(), userReward.getUsed()));
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found."));
+            int remainingPoint = pointService.getCurrentPoints(user);
+
+            return ResponseEntity.ok(Map.of(
+                    "id", userReward.getReward().getId(),                // 리워드 마스터 ID (6001 등)
+                    "rewardName", userReward.getReward().getRewardName(),
+                    "point", userReward.getReward().getCostPoint(),
+                    "used", userReward.getUsed(),
+                    "remainingPoint", remainingPoint,                    // 잔액
+                    "userRewardId", userReward.getId()                   // 발급된 내 리워드 PK
+            ));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
