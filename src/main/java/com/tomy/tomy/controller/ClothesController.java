@@ -32,7 +32,7 @@ public class ClothesController {
     public ResponseEntity<List<ClothesResponse>> getAllClothes() {
         List<Clothes> clothes = clothesService.getAllClothes();
         List<ClothesResponse> response = clothes.stream()
-                .map(c -> new ClothesResponse(c.getId(), c.getName(), c.getPrice(), c.getCategory(), c.getImageUrl()))
+                .map(c -> new ClothesResponse(c.getId(), c.getName(), c.getPrice(), c.getCategory(), c.getImageUrl(), c.getDescription()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
@@ -42,7 +42,7 @@ public class ClothesController {
         Optional<Clothes> clothes = clothesService.getClothesById(id);
         if (clothes.isPresent()) {
             Clothes c = clothes.get();
-            return ResponseEntity.ok(new ClothesResponse(c.getId(), c.getName(), c.getPrice(), c.getCategory(), c.getImageUrl()));
+            return ResponseEntity.ok(new ClothesResponse(c.getId(), c.getName(), c.getPrice(), c.getCategory(), c.getImageUrl(), c.getDescription()));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("옷을 찾을 수 없습니다."));
         }

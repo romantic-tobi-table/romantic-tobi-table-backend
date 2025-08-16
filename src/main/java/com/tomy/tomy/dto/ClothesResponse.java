@@ -13,4 +13,5 @@ public class ClothesResponse {
     private Integer price;
     private String category;
     private String imageUrl;
+    private String description;
 }
