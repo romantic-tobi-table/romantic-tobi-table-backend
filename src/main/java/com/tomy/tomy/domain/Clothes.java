@@ -29,4 +29,7 @@ public class Clothes {
 
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
+
+    @Column(length = 500, nullable = false)
+    private String description;
 }

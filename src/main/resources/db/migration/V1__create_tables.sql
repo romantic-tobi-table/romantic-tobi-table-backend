@@ -74,7 +74,8 @@ CREATE TABLE clothes (
     name VARCHAR(255) NOT NULL,
     category VARCHAR(255) NOT NULL,
     price INT NOT NULL,
-    image_url VARCHAR(255) NOT NULL
+    image_url VARCHAR(255) NOT NULL,
+    description VARCHAR(500) NOT NULL
 );
 
 -- UserClothes Table

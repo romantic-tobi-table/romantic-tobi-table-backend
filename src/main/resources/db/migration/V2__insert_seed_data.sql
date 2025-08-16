@@ -30,11 +30,13 @@ VALUES
 
 -- 4) CLOTHES (부모)
 INSERT INTO `clothes`
-(id, name, category, price, image_url)
+(id, name, category, price, image_url, description)
 VALUES
-    (4001, '모자',     'HEAD', 300, 'https://example.com/clothes/head-cap.png'),
-    (4002, '선글라스', 'EYE',  200, 'https://example.com/clothes/eye-sunglass.png'),
-    (4003, '턱수염',   'FACE', 250, 'https://example.com/clothes/face-mustache.png');
+    (4001, '밀짚 모자',     'HEAD', 500, 'https://example.com/clothes/head-cap.png', '챙이 적당히 넓다. 평범하지만 튼튼하다. 쓰고 뛰어도 쉽게 벗겨지지 않는다.'),
+    (4002, '선글라스', 'EYE',  500, 'https://example.com/clothes/eye-sunglass.png', '누가 봐도 연예인 같다. 멋 부릴 때 쓴다.'),
+    (4003, '턱수염',   'FACE', 100, 'https://example.com/clothes/face-mustache.png', '멋있는 턱수염이다. 중년미가 흐른다.'),
+    (4004, '리본',   'HEAD', 500, 'https://example.com/clothes/head-ribbon.png', '엄청 풍성한 리본. 뒤로 넘어져도 안 아플 것 같다');
+
 -- 5) PET (user FK, user_id UNIQUE)
 INSERT INTO `pet`
 (id, user_id, level, current_point, exp, updated_at)
