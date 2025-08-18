@@ -80,7 +80,7 @@ public class RewardService {
     }
 
     @Transactional
-    public int greetUser(Long userId) {
+    public Long greetUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
 

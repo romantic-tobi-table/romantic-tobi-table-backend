@@ -67,7 +67,7 @@ public class RewardController {
             UserReward userReward = rewardService.redeemReward(userId, rewardId);
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("User not found."));
-            int remainingPoint = pointService.getCurrentPoints(user);
+            Long remainingPoint = pointService.getCurrentPoints(user);
 
             return ResponseEntity.ok(Map.of(
                     "id", userReward.getReward().getId(),                // 리워드 마스터 ID (6001 등)
@@ -88,7 +88,7 @@ public class RewardController {
     public ResponseEntity<?> greetUser(@RequestHeader("Authorization") String authorizationHeader) {
         try {
             Long userId = getUserIdFromAuthorization(authorizationHeader);
-            int remainingPoint = rewardService.greetUser(userId);
+            Long remainingPoint = rewardService.greetUser(userId);
             return ResponseEntity.ok(new GreetingRewardResponse("인사 포인트 보상 완료.", remainingPoint));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));

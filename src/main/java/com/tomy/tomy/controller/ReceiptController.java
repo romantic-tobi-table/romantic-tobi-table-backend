@@ -1,21 +1,22 @@
 package com.tomy.tomy.controller;
 
+import com.tomy.tomy.domain.User;
 import com.tomy.tomy.dto.ErrorResponse;
 import com.tomy.tomy.dto.ReceiptCheckResponse;
 import com.tomy.tomy.dto.ReceiptUploadResponse;
-import com.tomy.tomy.dto.ReceiptVerifyRequest;
-import com.tomy.tomy.dto.ReceiptVerifyResponse;
-import com.tomy.tomy.domain.Receipt;
+import com.tomy.tomy.exception.DuplicateReceiptException;
+import com.tomy.tomy.repository.UserRepository;
+import com.tomy.tomy.security.JwtTokenProvider;
 import com.tomy.tomy.service.ReceiptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/receipt")
@@ -23,57 +24,65 @@ import java.util.stream.Collectors;
 public class ReceiptController {
 
     private final ReceiptService receiptService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
 
-    @PostMapping("/upload")
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadReceipt(@RequestHeader("Authorization") String authorizationHeader,
                                            @RequestParam("file") MultipartFile file) {
-        // TODO: Extract userId from JWT token in authorizationHeader
-        Long userId = 1L; // Placeholder
-
         try {
-            // TODO: Implement actual OCR processing and extract recognizedText, recognizedDate, ocrRawJson
-            String recognizedText = "구미상회 123,000원";
-            LocalDate recognizedDate = LocalDate.now();
-            String ocrRawJson = "{ \"raw\": \"ocr_data\" }";
+            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Authorization header missing or invalid."));
+            }
+            String token = authorizationHeader.substring(7);
+            if (!jwtTokenProvider.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Invalid or expired token."));
+            }
 
-            Receipt receipt = receiptService.uploadReceipt(userId, recognizedText, recognizedDate, ocrRawJson);
-            return ResponseEntity.ok(new ReceiptUploadResponse(receipt.getRecognizedText(), receipt.getRecognizedDate().toString(), "success"));
+            String username = jwtTokenProvider.getUserIdFromJWT(token);
+            Optional<User> userOptional = userRepository.findByUserId(username);
+            if (userOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("User not found for token."));
+            }
+            Long userId = userOptional.get().getId();
+
+            ReceiptUploadResponse response = receiptService.uploadReceipt(userId, file);
+
+            if ("소상공인 가게가 아닙니다".equals(response.getMessage())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (DuplicateReceiptException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("영수증 업로드 실패."));
         }
     }
 
-    @PostMapping("/verify")
-    public ResponseEntity<?> verifyReceipt(@RequestHeader("Authorization") String authorizationHeader,
-                                           @RequestBody ReceiptVerifyRequest request) {
-        // TODO: Extract userId from JWT token in authorizationHeader
-        Long userId = 1L; // Placeholder
-
-        try {
-            Receipt receipt = receiptService.verifyReceiptAndEarnPoints(userId, request.getRecognizedText(), LocalDate.parse(request.getRecognizedDate()));
-            // TODO: Fetch current points from PointService or Pet entity
-            Integer currentPoint = 2300; // Placeholder
-            return ResponseEntity.ok(new ReceiptVerifyResponse(receipt.getStore().getName(), receipt.getTotalPrice(), (int)(receipt.getTotalPrice() * 0.01), currentPoint));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("영수증 인증 실패."));
-        }
-    }
-
     @GetMapping("/check")
-    public ResponseEntity<?> checkReceipts(@RequestHeader("Authorization") String authorizationHeader) {
-        // TODO: Extract userId from JWT token in authorizationHeader
-        Long userId = 1L; // Placeholder
-
+    public ResponseEntity<?> getReceipts(@RequestHeader("Authorization") String authorizationHeader) {
         try {
-            List<Receipt> receipts = receiptService.getUserReceipts(userId);
-            List<ReceiptCheckResponse> response = receipts.stream()
-                    .map(receipt -> new ReceiptCheckResponse(receipt.getId(), receipt.getStore().getName(), receipt.getTotalPrice(), "메뉴 정보 없음")) // "메뉴" is not in ERD
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(response);
+            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Authorization header missing or invalid."));
+            }
+            String token = authorizationHeader.substring(7);
+            if (!jwtTokenProvider.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Invalid or expired token."));
+            }
+
+            String username = jwtTokenProvider.getUserIdFromJWT(token);
+            Optional<User> userOptional = userRepository.findByUserId(username);
+            if (userOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("User not found for token."));
+            }
+            Long userId = userOptional.get().getId();
+
+            List<ReceiptCheckResponse> receipts = receiptService.getReceipts(userId);
+            return ResponseEntity.ok(receipts);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {

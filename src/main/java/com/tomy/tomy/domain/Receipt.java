@@ -1,5 +1,6 @@
 package com.tomy.tomy.domain;
 
+import com.tomy.tomy.domain.Store;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "receipt", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "store_id", "recognized_date"})
+        @UniqueConstraint(columnNames = {"user_id", "store_id", "recognized_date"})
 })
 @Getter
 @Setter
@@ -27,23 +28,21 @@ public class Receipt {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "store_id", nullable = false)
+    @JoinColumn(name = "store_id", nullable = true) // Made nullable
     private Store store;
 
-    @Column(name = "total_price", nullable = false)
+    private String storeName;
+
+    private String address;
+
+    @Column(name = "total_price")
     private Integer totalPrice;
 
     @Column(name = "recognized_text", nullable = false)
     private String recognizedText;
 
-    @Column(name = "recognized_date", nullable = false)
+    @Column(name = "recognized_date")
     private LocalDate recognizedDate;
-
-    @Column(nullable = false)
-    private Boolean verified;
-
-    @Column(name = "ocr_raw_json", columnDefinition = "TEXT")
-    private String ocrRawJson;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

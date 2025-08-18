@@ -17,3 +17,9 @@ Thumbs.db
 # Application Config
 src/main/resources/application.yml
 src/main/resources/application-prod.yml
+
+build/
+*.log
+src/main/resources/application-local.yml
+src/main/resources/keys/
+

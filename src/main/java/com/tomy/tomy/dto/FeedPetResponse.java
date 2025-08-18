@@ -10,5 +10,5 @@ import lombok.Setter;
 public class FeedPetResponse {
     private String message;
     private Integer level;
-    private Integer remainingPoint;
+    private Long remainingPoint;
 }

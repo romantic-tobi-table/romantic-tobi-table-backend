@@ -32,12 +32,12 @@ CREATE TABLE store (
 CREATE TABLE receipt (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    store_id BIGINT NOT NULL,
+    store_id BIGINT, -- Made nullable
+    store_name VARCHAR(255), -- Added store_name, made nullable to match ReceiptService logic
     total_price INT NOT NULL,
     recognized_text TEXT NOT NULL,
-    recognized_date DATE NOT NULL,
-    verified BOOLEAN NOT NULL,
-    ocr_raw_json TEXT,
+    recognized_date DATE, -- Made nullable
+    address VARCHAR(255), -- Already nullable
     created_at DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES user(id),
     FOREIGN KEY (store_id) REFERENCES store(id),

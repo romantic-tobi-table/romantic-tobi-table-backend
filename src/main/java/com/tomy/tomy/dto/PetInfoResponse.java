@@ -9,6 +9,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PetInfoResponse {
     private Integer level;
-    private Integer currentPoint;
+    private Long currentPoint;
     private Integer exp;
 }

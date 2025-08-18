@@ -61,7 +61,7 @@ public class ClothesController {
             // TODO: Get remaining points from PointService
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("User not found."));
-            int remainingPoint = pointService.getCurrentPoints(user);
+            Long remainingPoint = pointService.getCurrentPoints(user);
 
             return ResponseEntity.ok(new PurchaseEquipClothesResponse("옷을 구매하고 착용했습니다.", remainingPoint));
         } catch (IllegalArgumentException e) {

@@ -27,7 +27,7 @@ public class Pet {
     private Integer level;
 
     @Column(name = "current_point", nullable = false)
-    private Integer currentPoint;
+    private Long currentPoint;
 
     @Column(nullable = false)
     private Integer exp;

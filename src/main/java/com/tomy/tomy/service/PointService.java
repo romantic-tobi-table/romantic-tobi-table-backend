@@ -20,11 +20,11 @@ public class PointService {
     private final PetRepository petRepository; // Pet holds current_point
 
     @Transactional
-    public void earnPoints(User user, int amount, PointTransactionType type, String refTable, Long refId) {
+    public void earnPoints(User user, long amount, PointTransactionType type, String refTable, Long refId) {
         Pet pet = petRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Pet not found for user."));
 
-        int newBalance = pet.getCurrentPoint() + amount;
+        long newBalance = pet.getCurrentPoint() + amount;
         pet.setCurrentPoint(newBalance);
         pet.setUpdatedAt(LocalDateTime.now());
         petRepository.save(pet);
@@ -32,8 +32,8 @@ public class PointService {
         PointTransaction transaction = new PointTransaction();
         transaction.setUser(user);
         transaction.setType(type);
-        transaction.setAmount(amount);
-        transaction.setBalanceAfter(newBalance);
+        transaction.setAmount((int) amount); // Assuming amount in transaction can be int
+        transaction.setBalanceAfter((int) newBalance); // Assuming balance in transaction can be int
         transaction.setRefTable(refTable);
         transaction.setRefId(refId);
         transaction.setCreatedAt(LocalDateTime.now());
@@ -41,7 +41,7 @@ public class PointService {
     }
 
     @Transactional
-    public void spendPoints(User user, int amount, PointTransactionType type, String refTable, Long refId) {
+    public void spendPoints(User user, long amount, PointTransactionType type, String refTable, Long refId) {
         Pet pet = petRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Pet not found for user."));
 
@@ -49,7 +49,7 @@ public class PointService {
             throw new IllegalArgumentException("포인트가 부족합니다.");
         }
 
-        int newBalance = pet.getCurrentPoint() - amount;
+        long newBalance = pet.getCurrentPoint() - amount;
         pet.setCurrentPoint(newBalance);
         pet.setUpdatedAt(LocalDateTime.now());
         petRepository.save(pet);
@@ -57,8 +57,8 @@ public class PointService {
         PointTransaction transaction = new PointTransaction();
         transaction.setUser(user);
         transaction.setType(type);
-        transaction.setAmount(-amount); // Record as negative for spending
-        transaction.setBalanceAfter(newBalance);
+        transaction.setAmount((int) -amount); // Record as negative for spending
+        transaction.setBalanceAfter((int) newBalance); // Assuming balance in transaction can be int
         transaction.setRefTable(refTable);
         transaction.setRefId(refId);
         transaction.setCreatedAt(LocalDateTime.now());
@@ -66,7 +66,7 @@ public class PointService {
     }
 
     @Transactional(readOnly = true)
-    public int getCurrentPoints(User user) {
+    public Long getCurrentPoints(User user) {
         Pet pet = petRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Pet not found for user."));
         return pet.getCurrentPoint();

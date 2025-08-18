@@ -9,5 +9,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GreetingRewardResponse {
     private String message;
-    private Integer remainingPoint;
+    private Long remainingPoint;
 }

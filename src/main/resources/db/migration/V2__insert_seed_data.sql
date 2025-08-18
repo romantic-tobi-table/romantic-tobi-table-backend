@@ -62,11 +62,11 @@ VALUES
 
 -- 8) RECEIPT (user/store FK, UNIQUE (user_id, store_id, recognized_date))
 INSERT INTO `receipt`
-(id, user_id, store_id, total_price, recognized_text, recognized_date, verified, ocr_raw_json, created_at)
+(id, user_id, store_id, total_price, recognized_text, recognized_date, address, created_at)
 VALUES
- (8001, 1001, 2001, 5800, '아메리카노 1, 쿠키 1', DATE_SUB(CURDATE(), INTERVAL 5 DAY), 1, NULL, NOW()),
- (8002, 1001, 2003, 12000, '영화 티켓 1',          DATE_SUB(CURDATE(), INTERVAL 3 DAY), 1, NULL, NOW()),
- (8003, 1002, 2001, 4300,  '라떼 1',                DATE_SUB(CURDATE(), INTERVAL 1 DAY), 0, NULL, NOW());
+ (8001, 1001, 2001, 5800, '아메리카노 1, 쿠키 1', DATE_SUB(CURDATE(), INTERVAL 5 DAY), NULL, NOW()),
+ (8002, 1001, 2003, 12000, '영화 티켓 1',          DATE_SUB(CURDATE(), INTERVAL 3 DAY), NULL, NOW()),
+ (8003, 1002, 2001, 4300,  '라떼 1',                DATE_SUB(CURDATE(), INTERVAL 1 DAY), NULL, NOW());
 
 -- 9) REVIEW (user/store/receipt FK)
 INSERT INTO `review`

@@ -25,7 +25,7 @@ public class PetService {
         Pet pet = new Pet();
         pet.setUser(user);
         pet.setLevel(1);
-        pet.setCurrentPoint(0);
+        pet.setCurrentPoint(0L);
         pet.setExp(0);
         pet.setUpdatedAt(LocalDateTime.now());
         return petRepository.save(pet);
