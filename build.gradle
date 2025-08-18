@@ -23,6 +23,10 @@ repositories {
 }
 
 dependencies {
+	// google BOM
+	implementation platform("com.google.cloud:libraries-bom:26.52.0") // 버전은 고정(BOM)
+	implementation "com.google.cloud:google-cloud-vision"   // 버전 생략(=BOM이 관리)
+
 	// Spring Boot Starters
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -67,4 +71,8 @@ flyway {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile) {
+	options.encoding = "UTF-8"
 }
