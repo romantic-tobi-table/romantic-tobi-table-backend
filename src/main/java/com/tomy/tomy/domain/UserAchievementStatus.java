@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "userachievementstatus")
+@Table(name = "user_achievement_status")
 @Getter
 @Setter
 @NoArgsConstructor

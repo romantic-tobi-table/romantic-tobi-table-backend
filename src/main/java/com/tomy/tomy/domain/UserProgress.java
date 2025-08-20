@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "userprogress")
+@Table(name = "user_progress")
 @Getter
 @Setter
 @NoArgsConstructor

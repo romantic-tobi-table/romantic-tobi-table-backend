@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name = "AchievementMilestone")
+@Table(name = "achievement_milestone")
 @Getter
 @Setter
 @NoArgsConstructor

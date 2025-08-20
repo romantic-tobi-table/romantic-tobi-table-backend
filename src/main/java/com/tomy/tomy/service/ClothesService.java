@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +46,11 @@ public class ClothesService {
                 .orElseThrow(() -> new IllegalArgumentException("Pet not found for user."));
         Clothes clothes = clothesRepository.findById(clothesId)
                 .orElseThrow(() -> new IllegalArgumentException("Clothes not found."));
+
+        Set<String> ALLOWED = Set.of("HEAD", "EYE", "FACE");
+        if (!ALLOWED.contains(clothes.getCategory())) {
+            throw new IllegalArgumentException("지원하지 않는 카테고리입니다: " + clothes.getCategory());
+        }
 
         // Check if already purchased
         Optional<UserClothes> existingUserClothes = userClothesRepository.findByPetAndClothes(pet, clothes);

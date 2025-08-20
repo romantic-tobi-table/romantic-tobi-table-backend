@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "PointTransaction")
+@Table(name = "point_transaction")
 @Getter
 @Setter
 @NoArgsConstructor

@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.time.ZoneId;
 
 @Service
 @RequiredArgsConstructor
@@ -50,11 +51,11 @@ public class RewardService {
             throw new IllegalArgumentException("리워드 재고가 부족합니다.");
         }
 
-        // Check if user already redeemed this specific reward and it's not reusable
-        Optional<UserReward> existingUserReward = userRewardRepository.findByUserAndReward(user, reward);
-        if (existingUserReward.isPresent() && existingUserReward.get().getUsed()) {
-            throw new IllegalArgumentException("이미 사용한 리워드입니다.");
-        }
+//        // Check if user already redeemed this specific reward and it's not reusable
+//        Optional<UserReward> existingUserReward = userRewardRepository.findByUserAndReward(user, reward);
+//        if (existingUserReward.isPresent() && existingUserReward.get().getUsed()) {
+//            throw new IllegalArgumentException("이미 사용한 리워드입니다.");
+//        }
 
         // Spend points
         pointService.spendPoints(user, reward.getCostPoint(), PointTransactionType.REWARD_REDEEM, "Reward redemption", reward.getId());
@@ -65,7 +66,7 @@ public class RewardService {
             rewardRepository.save(reward);
         }
 
-        UserReward userReward = existingUserReward.orElseGet(UserReward::new);
+        UserReward userReward = new UserReward();
         userReward.setUser(user);
         userReward.setReward(reward);
         userReward.setUsed(true); // Mark as used upon redemption
@@ -79,11 +80,11 @@ public class RewardService {
     }
 
     @Transactional
-    public int greetUser(Long userId) {
+    public Long greetUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         Optional<GreetingLog> existingGreeting = greetingLogRepository.findByUserAndGreetedDate(user, today);
 
         if (existingGreeting.isPresent()) {

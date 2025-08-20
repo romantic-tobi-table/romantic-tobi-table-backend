@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +26,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with userId: " + userId));
 
         // For simplicity, assuming no roles for now. In a real app, you'd load user roles.
-        return new org.springframework.security.core.userdetails.User(user.getUserId(), user.getPassword(), new ArrayList<>());
+        return new org.springframework.security.core.userdetails.User(user.getUserId(), user.getPassword(), List.of(new SimpleGrantedAuthority("ROLE_USER")));
     }
 }

@@ -1,6 +1,6 @@
 -- V5__insert_achievement_milestones.sql
 
-INSERT INTO AchievementMilestone (achievement_id, milestone_value, name, description, type)
+INSERT INTO achievement_milestone (achievement_id, milestone_value, name, description, type)
 VALUES
     -- Attendance Milestones (achievement_id = 3001 for ATTENDANCE_SEQ)
     (3001, 3, '연속 3일 출석 성공', '3일 연속 출석 달성', 'ATTENDANCE'),

@@ -1,10 +1,9 @@
 package com.tomy.tomy.service;
 
-import com.tomy.tomy.domain.Pet;
 import com.tomy.tomy.domain.User;
-import com.tomy.tomy.repository.PetRepository;
 import com.tomy.tomy.repository.UserRepository;
 import com.tomy.tomy.security.JwtTokenProvider;
+import com.tomy.tomy.service.PetService; // New import
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,10 +21,10 @@ import java.util.Optional;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final PetRepository petRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager; // Added
     private final JwtTokenProvider jwtTokenProvider; // Added
+    private final PetService petService; // New dependency
 
     @Transactional
     public User signup(String userId, String password, String birthday, String nickname, String gender, Boolean allowNotification) {
@@ -41,16 +40,10 @@ public class AuthService {
         user.setGender(gender);
         user.setAllowNotification(allowNotification);
         user.setCreatedAt(LocalDateTime.now());
-        User savedUser = userRepository.save(user);
+        User savedUser = userRepository.save(user); // Save user first
 
-        // Create and save a default Pet for the new user
-        Pet pet = new Pet();
-        pet.setUser(savedUser);
-        pet.setLevel(1);
-        pet.setCurrentPoint(0);
-        pet.setExp(0);
-        pet.setUpdatedAt(LocalDateTime.now());
-        petRepository.save(pet);
+        // Create a pet for the new user
+        petService.createPet(savedUser);
 
         return savedUser;
     }

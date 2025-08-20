@@ -30,12 +30,12 @@ VALUES
 
 -- 4) CLOTHES (부모)
 INSERT INTO `clothes`
-(id, name, category, price, image_url)
+(id, name, category, price, image_url, description)
 VALUES
- (4001, '기본 티셔츠', 'TOP',   100,  'https://example.com/clothes/top-basic.png'),
- (4002, '선글라스',     'FACE',  200,  'https://example.com/clothes/face-sunglass.png'),
- (4003, '모자',         'HEAD',  300,  'https://example.com/clothes/head-cap.png'),
- (4004, '신발',         'FOOT',  250,  'https://example.com/clothes/foot-shoes.png');
+    (4001, '밀짚 모자',     'HEAD', 500, 'https://example.com/clothes/head-cap.png', '챙이 적당히 넓다. 평범하지만 튼튼하다. 쓰고 뛰어도 쉽게 벗겨지지 않는다.'),
+    (4002, '선글라스', 'EYE',  500, 'https://example.com/clothes/eye-sunglass.png', '누가 봐도 연예인 같다. 멋 부릴 때 쓴다.'),
+    (4003, '턱수염',   'FACE', 100, 'https://example.com/clothes/face-mustache.png', '멋있는 턱수염이다. 중년미가 흐른다.'),
+    (4004, '리본',   'HEAD', 500, 'https://example.com/clothes/head-ribbon.png', '엄청 풍성한 리본. 뒤로 넘어져도 안 아플 것 같다');
 
 -- 5) PET (user FK, user_id UNIQUE)
 INSERT INTO `pet`
@@ -62,11 +62,11 @@ VALUES
 
 -- 8) RECEIPT (user/store FK, UNIQUE (user_id, store_id, recognized_date))
 INSERT INTO `receipt`
-(id, user_id, store_id, total_price, recognized_text, recognized_date, verified, ocr_raw_json, created_at)
+(id, user_id, store_id, total_price, recognized_text, recognized_date, address, created_at)
 VALUES
- (8001, 1001, 2001, 5800, '아메리카노 1, 쿠키 1', DATE_SUB(CURDATE(), INTERVAL 5 DAY), 1, NULL, NOW()),
- (8002, 1001, 2003, 12000, '영화 티켓 1',          DATE_SUB(CURDATE(), INTERVAL 3 DAY), 1, NULL, NOW()),
- (8003, 1002, 2001, 4300,  '라떼 1',                DATE_SUB(CURDATE(), INTERVAL 1 DAY), 0, NULL, NOW());
+ (8001, 1001, 2001, 5800, '아메리카노 1, 쿠키 1', DATE_SUB(CURDATE(), INTERVAL 5 DAY), NULL, NOW()),
+ (8002, 1001, 2003, 12000, '영화 티켓 1',          DATE_SUB(CURDATE(), INTERVAL 3 DAY), NULL, NOW()),
+ (8003, 1002, 2001, 4300,  '라떼 1',                DATE_SUB(CURDATE(), INTERVAL 1 DAY), NULL, NOW());
 
 -- 9) REVIEW (user/store/receipt FK)
 INSERT INTO `review`

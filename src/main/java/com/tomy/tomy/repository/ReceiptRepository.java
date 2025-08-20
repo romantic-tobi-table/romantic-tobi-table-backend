@@ -14,4 +14,7 @@ import java.util.Optional;
 public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
     Optional<Receipt> findByUserAndStoreAndRecognizedDate(User user, Store store, LocalDate recognizedDate);
     List<Receipt> findByUser(User user);
+    Optional<Receipt> findByUserAndStoreNameAndRecognizedDate(User user, String storeName, LocalDate recognizedDate);
+
+    List<Receipt> findAllByUser(User user);
 }
