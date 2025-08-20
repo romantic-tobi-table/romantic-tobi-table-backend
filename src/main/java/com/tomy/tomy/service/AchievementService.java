@@ -43,7 +43,7 @@ public class AchievementService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
-        UserProgress userProgress = userProgressRepository.findByUser(user)
+        UserProgress userProgress = userProgressRepository.findByUserId(userId)
                 .orElseGet(() -> new UserProgress(null, user, 0, null, 0, 0, LocalDateTime.now()));
 
         List<UserAchievementStatus> userAchievementStatuses = userAchievementStatusRepository.findByUser(user);
@@ -66,7 +66,7 @@ public class AchievementService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
-        UserProgress userProgress = userProgressRepository.findByUser(user)
+        UserProgress userProgress = userProgressRepository.findByUserId(userId)
                 .orElseGet(() -> new UserProgress(null, user, 0, null, 0, 0, LocalDateTime.now()));
 
         LocalDate today = LocalDate.now();

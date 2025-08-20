@@ -4,6 +4,7 @@ import com.tomy.tomy.domain.Reward;
 import com.tomy.tomy.domain.User;
 import com.tomy.tomy.domain.UserReward;
 import com.tomy.tomy.domain.GreetingLog;
+import com.tomy.tomy.dto.AchievementUpdateRequest;
 import com.tomy.tomy.enums.PointTransactionType;
 import com.tomy.tomy.repository.RewardRepository;
 import com.tomy.tomy.repository.UserRepository;
@@ -28,6 +29,7 @@ public class RewardService {
     private final UserRepository userRepository;
     private final PointService pointService;
     private final GreetingLogRepository greetingLogRepository;
+    private final AchievementService achievementService;
 
     @Transactional(readOnly = true)
     public List<UserReward> getUserRewards(Long userId) {
@@ -101,6 +103,8 @@ public class RewardService {
         greetingLog.setPointAwarded(greetingPoints);
         greetingLog.setCreatedAt(LocalDateTime.now());
         greetingLogRepository.save(greetingLog);
+        achievementService.updateUserAchievementProgress(userId, AchievementUpdateRequest.AchievementType.ATTENDANCE);
+
 
         return pointService.getCurrentPoints(user);
     }

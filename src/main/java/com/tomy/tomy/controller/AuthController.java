@@ -5,6 +5,8 @@ import com.tomy.tomy.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal; // New import
+import org.springframework.security.core.userdetails.UserDetails; // New import
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -44,11 +46,10 @@ public class AuthController {
     }
 
     @DeleteMapping("/withdraw")
-    public ResponseEntity<?> withdraw(@RequestBody WithdrawRequest request) {
-        // In a real application, you'd get the userId from the authenticated user's context (e.g., JWT)
-        // For now, assuming userId is available or passed implicitly
+    public ResponseEntity<?> withdraw(@AuthenticationPrincipal UserDetails userDetails, @RequestBody WithdrawRequest request) {
         try {
-            authService.withdraw("current_user_id"); // Placeholder for actual user ID
+            String userId = userDetails.getUsername();
+            authService.withdraw(userId, request);
             return ResponseEntity.ok(new AuthResponse("회원 탈퇴 완료"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
