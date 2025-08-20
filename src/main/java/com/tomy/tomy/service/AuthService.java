@@ -33,7 +33,7 @@ public class AuthService {
     @Transactional
     public User signup(String userId, String password, String birthday, String nickname, String gender, Boolean allowNotification) {
         if (userRepository.existsByUserId(userId)) {
-            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+            throw new IllegalArgumentException("이미 사용중인 아이디입니다.");
         }
 
         User user = new User();
@@ -59,6 +59,11 @@ public class AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return jwtTokenProvider.generateToken(authentication);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean checkUserIdDuplication(String userId) {
+        return userRepository.existsByUserId(userId);
     }
 
     @Transactional
