@@ -4,6 +4,7 @@ import com.tomy.tomy.domain.Pet;
 import com.tomy.tomy.domain.Receipt;
 import com.tomy.tomy.domain.Store;
 import com.tomy.tomy.domain.User;
+import com.tomy.tomy.dto.AchievementUpdateRequest;
 import com.tomy.tomy.dto.EnhancedParsedReceipt;
 import com.tomy.tomy.dto.ReceiptCheckResponse;
 import com.tomy.tomy.dto.ReceiptUploadResponse;
@@ -35,6 +36,7 @@ public class ReceiptService {
     private final PetRepository petRepository;
     private final OcrService ocrService;
     private final ReceiptParser receiptParser;
+    private final AchievementService achievementService;
 
     @Transactional
     public ReceiptUploadResponse uploadReceipt(Long userId, MultipartFile file) {
@@ -115,6 +117,7 @@ public class ReceiptService {
         receipt.setRecognizedDate(paidAt);
         receipt.setCreatedAt(LocalDateTime.now());
         receiptRepository.save(receipt);
+        achievementService.updateUserAchievementProgress(userId, AchievementUpdateRequest.AchievementType.RECEIPT);
 
         return new ReceiptUploadResponse(parsedData.storeName(), parsedData.paidAt(), parsedData.address(), parsedData.amount(), pointsEarned, pet.getCurrentPoint(), "영수증 인증 완료", null);
     }

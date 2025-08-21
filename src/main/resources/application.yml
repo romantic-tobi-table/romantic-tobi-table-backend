@@ -9,7 +9,7 @@ spring:
     validate-on-migrate: false
     locations: classpath:db/migration
 jwt:
-  secret: aF9zZWNyZXRfa2V5X2Zvcl9KV1RfSE1BQ19zaGEyNTZfYWxnb3JpdGhtX2lzX2F0X2xlYXN0XzMyX2J5dGVzX2xvbmc=
+  secret: ${jwt_KEY}
   expiration-time: 86400000 # 24 hours in milliseconds
 
 # OpenAI API Key
@@ -22,3 +22,6 @@ openai:
 gcp:
   vision:
     credentials: "file:C:/Users/effor/.key/enduring-sign-436506-t5-baea74924a88.json"
+
+server:
+  port: 8080

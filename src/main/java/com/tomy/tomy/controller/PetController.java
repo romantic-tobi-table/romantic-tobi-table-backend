@@ -46,19 +46,6 @@ public class PetController {
         }
     }
 
-    @PostMapping("/levelup")
-    public ResponseEntity<?> levelUpPet(@RequestHeader("Authorization") String authorizationHeader,
-                                        @RequestBody LevelUpRequest request) {
-        String userId = getUserIdFromAuthorizationHeader(authorizationHeader); // Changed to String
-
-        try {
-            Pet pet = petService.levelUpPet(userId, request.getExceededexp()); // Pass String userId
-            return ResponseEntity.ok(new LevelUpResponse("레벨업 하였습니다.", pet.getLevel(), pet.getExp()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
-        }
-    }
-
     // Helper method to extract userId (String) from JWT token
     private String getUserIdFromAuthorizationHeader(String authorizationHeader) { // Changed return type to String
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix

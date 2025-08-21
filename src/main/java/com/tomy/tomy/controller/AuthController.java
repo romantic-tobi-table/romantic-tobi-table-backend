@@ -2,10 +2,20 @@ package com.tomy.tomy.controller;
 
 import com.tomy.tomy.dto.*;
 import com.tomy.tomy.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal; // New import
+import org.springframework.security.core.userdetails.UserDetails; // New import
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,7 +34,22 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "아이디 중복 확인", description = "입력된 아이디의 사용 가능 여부를 확인합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "확인 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(example = "{\"isTaken\": true}")))
+    })
+    @GetMapping("/check")
+    public ResponseEntity<?> checkUserIdDuplication(
+            @Parameter(description = "중복 확인할 아이디", required = true, example = "test1234")
+            @RequestParam("userId") String userId) {
+        boolean isTaken = authService.checkUserIdDuplication(userId);
+        return ResponseEntity.ok(Map.of("isTaken", isTaken));
+    }
+
     @PostMapping("/login")
+
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
             String accessToken = authService.login(request.getUserId(), request.getPassword());
@@ -44,11 +69,10 @@ public class AuthController {
     }
 
     @DeleteMapping("/withdraw")
-    public ResponseEntity<?> withdraw(@RequestBody WithdrawRequest request) {
-        // In a real application, you'd get the userId from the authenticated user's context (e.g., JWT)
-        // For now, assuming userId is available or passed implicitly
+    public ResponseEntity<?> withdraw(@AuthenticationPrincipal UserDetails userDetails, @RequestBody WithdrawRequest request) {
         try {
-            authService.withdraw("current_user_id"); // Placeholder for actual user ID
+            String userId = userDetails.getUsername();
+            authService.withdraw(userId, request);
             return ResponseEntity.ok(new AuthResponse("회원 탈퇴 완료"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
