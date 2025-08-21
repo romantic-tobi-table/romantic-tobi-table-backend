@@ -28,7 +28,7 @@ public class StoreService {
     }
 
     @Transactional(readOnly = true)
-    public List<Store> searchStoresByName(String name) {
-        return storeRepository.findByNameContainingIgnoreCase(name);
+    public Page<Store> searchStoresByName(String name, Pageable pageable) {
+        return storeRepository.findByNameContainingIgnoreCase(name, pageable);
     }
 }

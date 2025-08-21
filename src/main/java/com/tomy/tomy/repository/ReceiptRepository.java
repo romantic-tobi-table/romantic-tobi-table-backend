@@ -16,5 +16,7 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
     List<Receipt> findByUser(User user);
     Optional<Receipt> findByUserAndStoreNameAndRecognizedDate(User user, String storeName, LocalDate recognizedDate);
 
+    boolean existsByStoreNameAndRecognizedDateAndTotalPrice(String storeName, LocalDate recognizedDate, Integer totalPrice);
+
     List<Receipt> findAllByUser(User user);
 }

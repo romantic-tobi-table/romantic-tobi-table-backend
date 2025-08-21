@@ -16,6 +16,8 @@ import com.tomy.tomy.repository.ReceiptRepository;
 import com.tomy.tomy.repository.StoreRepository;
 import com.tomy.tomy.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -49,6 +51,15 @@ public class ReceiptService {
 
         EnhancedParsedReceipt parsedData = receiptParser.parse(rawText);
 
+        int amount = 0;
+        if (parsedData.amount() != null) {
+            try {
+                amount = Integer.parseInt(parsedData.amount().replaceAll(",", ""));
+            } catch (NumberFormatException e) {
+                // 금액 파싱 실패 시 처리
+            }
+        }
+
         LocalDate paidAt = null;
         if (parsedData.paidAt() != null) {
             try {
@@ -60,10 +71,9 @@ public class ReceiptService {
         }
 
         if (paidAt != null) {
-            receiptRepository.findByUserAndStoreNameAndRecognizedDate(user, parsedData.storeName(), paidAt)
-                    .ifPresent(r -> {
-                        throw new DuplicateReceiptException("이미 인증한 영수증 입니다.");
-                    });
+            if (receiptRepository.existsByStoreNameAndRecognizedDateAndTotalPrice(parsedData.storeName(), paidAt, amount)) {
+                throw new DuplicateReceiptException("이미 인증된 영수증입니다.");
+            }
         }
 
 
@@ -77,7 +87,8 @@ public class ReceiptService {
         }
 
         if (matchedStore == null) { // If no exact match or address mismatch, try fuzzy
-            List<Store> fuzzyMatchedStores = storeRepository.findByNameContainingIgnoreCase(parsedData.storeName());
+            Page<Store> fuzzyMatchedStoresPage = storeRepository.findByNameContainingIgnoreCase(parsedData.storeName(), PageRequest.of(0, 5));
+            List<Store> fuzzyMatchedStores = fuzzyMatchedStoresPage.getContent();
             for (Store store : fuzzyMatchedStores) {
                 if (parsedData.address() != null && parsedData.address().contains(store.getAddress())) {
                     matchedStore = store;
@@ -88,15 +99,6 @@ public class ReceiptService {
 
         if (matchedStore == null) {
             return new ReceiptUploadResponse(null, null, null, null, null, null, "소상공인 가게가 아닙니다", null);
-        }
-
-        int amount = 0;
-        if (parsedData.amount() != null) {
-            try {
-                amount = Integer.parseInt(parsedData.amount().replaceAll(",", ""));
-            } catch (NumberFormatException e) {
-                // 금액 파싱 실패 시 처리
-            }
         }
 
         long pointsEarned = amount / 100;

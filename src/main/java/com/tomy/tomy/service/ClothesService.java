@@ -58,12 +58,12 @@ public class ClothesService {
             // If already purchased, just equip it
             UserClothes uc = existingUserClothes.get();
             if (!uc.getIsEquipped()) {
-                // Unequip current clothes of the same category
-                userClothesRepository.findByPetAndClothesCategoryAndIsEquipped(pet, clothes.getCategory(), true)
-                        .ifPresent(currentEquipped -> {
-                            currentEquipped.setIsEquipped(false);
-                            userClothesRepository.save(currentEquipped);
-                        });
+                // Unequip all currently equipped clothes
+                List<UserClothes> equippedClothes = userClothesRepository.findByPetAndIsEquipped(pet, true);
+                for (UserClothes currentlyEquipped : equippedClothes) {
+                    currentlyEquipped.setIsEquipped(false);
+                    userClothesRepository.save(currentlyEquipped);
+                }
                 uc.setIsEquipped(true);
                 return userClothesRepository.save(uc);
             } else {
@@ -74,13 +74,14 @@ public class ClothesService {
         // Spend points to purchase
         pointService.spendPoints(user, clothes.getPrice(), PointTransactionType.CLOTHES_BUY, "Clothes purchase", clothes.getId());
 
-        // Unequip current clothes of the same category before equipping new one
-        userClothesRepository.findByPetAndClothesCategoryAndIsEquipped(pet, clothes.getCategory(), true)
-                .ifPresent(currentEquipped -> {
-                    currentEquipped.setIsEquipped(false);
-                    userClothesRepository.save(currentEquipped);
-                });
+        // Unequip all currently equipped clothes before equipping new one
+        List<UserClothes> equippedClothes = userClothesRepository.findByPetAndIsEquipped(pet, true);
+        for (UserClothes currentlyEquipped : equippedClothes) {
+            currentlyEquipped.setIsEquipped(false);
+            userClothesRepository.save(currentlyEquipped);
+        }
 
+        // Equip the new clothes
         UserClothes userClothes = new UserClothes();
         userClothes.setPet(pet);
         userClothes.setClothes(clothes);
@@ -107,11 +108,11 @@ public class ClothesService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserClothes> getEquippedClothes(Long userId) {
+    public Optional<UserClothes> getEquippedClothes(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
         Pet pet = petRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Pet not found for user."));
-        return userClothesRepository.findByPetAndIsEquipped(pet, true);
+        return userClothesRepository.findByPetAndIsEquipped(pet, true).stream().findFirst();
     }
 }

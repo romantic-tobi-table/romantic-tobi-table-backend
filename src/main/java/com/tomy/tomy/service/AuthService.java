@@ -1,8 +1,13 @@
 package com.tomy.tomy.service;
 
+import com.tomy.tomy.domain.Pet;
 import com.tomy.tomy.domain.User;
+import com.tomy.tomy.domain.UserAchievementStatus;
 import com.tomy.tomy.domain.UserWithdrawal;
+import com.tomy.tomy.dto.MyPageResponse;
 import com.tomy.tomy.dto.WithdrawRequest;
+import com.tomy.tomy.repository.PetRepository;
+import com.tomy.tomy.repository.UserAchievementStatusRepository;
 import com.tomy.tomy.repository.UserRepository;
 import com.tomy.tomy.repository.UserWithdrawalRepository;
 import com.tomy.tomy.security.JwtTokenProvider;
@@ -29,6 +34,8 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PetService petService;
     private final UserWithdrawalRepository userWithdrawalRepository;
+    private final PetRepository petRepository;
+    private final UserAchievementStatusRepository userAchievementStatusRepository;
 
     @Transactional
     public User signup(String userId, String password, String birthday, String nickname, String gender, Boolean allowNotification) {
@@ -86,5 +93,19 @@ public class AuthService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         user.setPassword(passwordEncoder.encode(newPassword));
         return userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public MyPageResponse getMyPageInfo(String userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        Pet pet = petRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("사용자의 펫을 찾을 수 없습니다."));
+
+        Optional<UserAchievementStatus> latestAchievementOptional = userAchievementStatusRepository.findTopByUserAndIsAchievedTrueOrderByAchievedAtDesc(user);
+        String latestAchievementName = latestAchievementOptional.map(status -> status.getAchievementMilestone().getName()).orElse("아직 달성한 업적이 없어요");
+
+        return new MyPageResponse(user.getNickname(), user.getBirthday(), pet.getLevel(), latestAchievementName);
     }
 }

@@ -10,4 +10,5 @@ import lombok.Setter;
 public class StoreSearchResponse {
     private Long id;
     private String name;
+    private String address;
 }

@@ -46,11 +46,9 @@ public class StoreController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<StoreSearchResponse>> searchStoresByName(@RequestParam String name) {
-        List<Store> stores = storeService.searchStoresByName(name);
-        List<StoreSearchResponse> response = stores.stream()
-                .map(store -> new StoreSearchResponse(store.getId(), store.getName()))
-                .collect(Collectors.toList());
+    public ResponseEntity<Page<StoreSearchResponse>> searchStoresByName(@RequestParam String name, @ParameterObject @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<Store> stores = storeService.searchStoresByName(name, pageable);
+        Page<StoreSearchResponse> response = stores.map(store -> new StoreSearchResponse(store.getId(), store.getName(), store.getAddress()));
         return ResponseEntity.ok(response);
     }
 }

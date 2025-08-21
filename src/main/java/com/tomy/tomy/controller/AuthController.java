@@ -53,9 +53,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
             String accessToken = authService.login(request.getUserId(), request.getPassword());
-            // In a real scenario, you'd fetch the nickname from the User object after successful login
-            // For now, using a placeholder
-            return ResponseEntity.ok(new LoginResponse(accessToken, "홍길동"));
+            return ResponseEntity.ok(new LoginResponse(accessToken));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(e.getMessage()));
         }
@@ -89,6 +87,16 @@ public class AuthController {
             return ResponseEntity.ok(new AuthResponse("비밀번호 변경 완료되었습니다."));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/mypage")
+    public ResponseEntity<?> getMyPage(@AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            MyPageResponse myPageResponse = authService.getMyPageInfo(userDetails.getUsername());
+            return ResponseEntity.ok(myPageResponse);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         }
     }
 }

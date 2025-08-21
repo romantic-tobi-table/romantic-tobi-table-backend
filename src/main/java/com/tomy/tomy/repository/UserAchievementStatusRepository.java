@@ -13,4 +13,5 @@ import java.util.Optional;
 public interface UserAchievementStatusRepository extends JpaRepository<UserAchievementStatus, Long> {
     List<UserAchievementStatus> findByUser(User user);
     Optional<UserAchievementStatus> findByUserAndAchievementMilestone(User user, AchievementMilestone achievementMilestone);
+    Optional<UserAchievementStatus> findTopByUserAndIsAchievedTrueOrderByAchievedAtDesc(User user);
 }
