@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -90,16 +91,17 @@ public class ClothesController {
 
     @GetMapping("/pet/appearance")
     public ResponseEntity<?> getEquippedClothes(@RequestHeader("Authorization") String authorizationHeader) {
-        // TODO: Extract userId from JWT token in authorizationHeader
         Long userId = getUserIdFromAuthorization(authorizationHeader);
 
-
         try {
-            List<UserClothes> equippedClothes = clothesService.getEquippedClothes(userId);
-            List<EquippedClothesResponse> response = equippedClothes.stream()
-                    .map(uc -> new EquippedClothesResponse(uc.getClothes().getId(), uc.getClothes().getName(), uc.getClothes().getCategory(), uc.getClothes().getImageUrl()))
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(response);
+            Optional<UserClothes> equippedClothesOpt = clothesService.getEquippedClothes(userId);
+            if (equippedClothesOpt.isPresent()) {
+                UserClothes uc = equippedClothesOpt.get();
+                EquippedClothesResponse response = new EquippedClothesResponse(uc.getClothes().getId(), uc.getClothes().getName(), uc.getClothes().getCategory(), uc.getClothes().getImageUrl());
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.ok(Map.of("message", "착용한 옷이 없습니다."));
+            }
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         }
