@@ -1,5 +1,6 @@
 package com.tomy.tomy.domain;
 
+import com.tomy.tomy.enums.ClothesStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,8 +30,9 @@ public class UserClothes {
     @JoinColumn(name = "clothes_id", nullable = false)
     private Clothes clothes;
 
-    @Column(name = "is_equipped", nullable = false)
-    private Boolean isEquipped;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 16)
+    private ClothesStatus status;
 
     @Column(name = "purchased_at", nullable = false)
     private LocalDateTime purchasedAt;

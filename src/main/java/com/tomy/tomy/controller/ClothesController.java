@@ -30,28 +30,28 @@ public class ClothesController {
 
 
     @GetMapping
-    public ResponseEntity<List<ClothesResponse>> getAllClothes() {
-        List<Clothes> clothes = clothesService.getAllClothes();
-        List<ClothesResponse> response = clothes.stream()
-                .map(c -> new ClothesResponse(c.getId(), c.getName(), c.getPrice(), c.getCategory(), c.getImageUrl(), c.getDescription()))
-                .collect(Collectors.toList());
+    public ResponseEntity<List<ClothesResponse>> getAllClothes(
+            @RequestHeader("Authorization") String authorizationHeader) {
+        Long userId = getUserIdFromAuthorization(authorizationHeader);
+        List<ClothesResponse> response = clothesService.getAllClothesWithStatus(userId);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getClothesById(@PathVariable Long id) {
-        Optional<Clothes> clothes = clothesService.getClothesById(id);
-        if (clothes.isPresent()) {
-            Clothes c = clothes.get();
-            return ResponseEntity.ok(new ClothesResponse(c.getId(), c.getName(), c.getPrice(), c.getCategory(), c.getImageUrl(), c.getDescription()));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("옷을 찾을 수 없습니다."));
-        }
+    public ResponseEntity<?> getClothesById(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long id) {
+        Long userId = getUserIdFromAuthorization(authorizationHeader);
+        return clothesService.getClothesById(userId, id)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ErrorResponse("옷을 찾을 수 없습니다.")));
     }
 
     @PostMapping("/pet/dress/{id}")
-    public ResponseEntity<?> purchaseAndEquipClothes(@RequestHeader("Authorization") String authorizationHeader,
-                                                     @PathVariable("id") Long clothesId) {
+    public ResponseEntity<?> purchaseAndEquipClothes(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable("id") Long clothesId) {
         // TODO: Extract userId from JWT token in authorizationHeader
 
         try {

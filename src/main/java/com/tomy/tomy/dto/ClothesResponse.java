@@ -1,5 +1,6 @@
 package com.tomy.tomy.dto;
 
+import com.tomy.tomy.enums.ClothesStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,4 +15,5 @@ public class ClothesResponse {
     private String category;
     private String imageUrl;
     private String description;
+    private ClothesStatus status;
 }
