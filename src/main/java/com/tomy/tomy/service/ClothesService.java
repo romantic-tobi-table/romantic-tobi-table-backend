@@ -4,6 +4,8 @@ import com.tomy.tomy.domain.Clothes;
 import com.tomy.tomy.domain.Pet;
 import com.tomy.tomy.domain.User;
 import com.tomy.tomy.domain.UserClothes;
+import com.tomy.tomy.dto.ClothesResponse;
+import com.tomy.tomy.enums.ClothesStatus;
 import com.tomy.tomy.enums.PointTransactionType;
 import com.tomy.tomy.repository.ClothesRepository;
 import com.tomy.tomy.repository.PetRepository;
@@ -17,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,29 +58,27 @@ public class ClothesService {
         // Check if already purchased
         Optional<UserClothes> existingUserClothes = userClothesRepository.findByPetAndClothes(pet, clothes);
         if (existingUserClothes.isPresent()) {
-            // If already purchased, just equip it
             UserClothes uc = existingUserClothes.get();
-            if (!uc.getIsEquipped()) {
-                // Unequip all currently equipped clothes
-                List<UserClothes> equippedClothes = userClothesRepository.findByPetAndIsEquipped(pet, true);
-                for (UserClothes currentlyEquipped : equippedClothes) {
-                    currentlyEquipped.setIsEquipped(false);
-                    userClothesRepository.save(currentlyEquipped);
-                }
-                uc.setIsEquipped(true);
-                return userClothesRepository.save(uc);
-            } else {
+            if (uc.getStatus() == ClothesStatus.EQUIPPED) {
                 throw new IllegalArgumentException("이미 착용 중인 옷입니다.");
             }
+
+            List<UserClothes> equippedClothes = userClothesRepository.findByPetAndStatus(pet, ClothesStatus.EQUIPPED);
+            for (UserClothes currentlyEquipped : equippedClothes) {
+                currentlyEquipped.setStatus(ClothesStatus.OWNED);
+                userClothesRepository.save(currentlyEquipped);
+            }
+            uc.setStatus(ClothesStatus.EQUIPPED);
+            return userClothesRepository.save(uc);
         }
 
         // Spend points to purchase
         pointService.spendPoints(user, clothes.getPrice(), PointTransactionType.CLOTHES_BUY, "Clothes purchase", clothes.getId());
 
         // Unequip all currently equipped clothes before equipping new one
-        List<UserClothes> equippedClothes = userClothesRepository.findByPetAndIsEquipped(pet, true);
+        List<UserClothes> equippedClothes = userClothesRepository.findByPetAndStatus(pet, ClothesStatus.EQUIPPED);
         for (UserClothes currentlyEquipped : equippedClothes) {
-            currentlyEquipped.setIsEquipped(false);
+            currentlyEquipped.setStatus(ClothesStatus.OWNED);
             userClothesRepository.save(currentlyEquipped);
         }
 
@@ -85,7 +86,7 @@ public class ClothesService {
         UserClothes userClothes = new UserClothes();
         userClothes.setPet(pet);
         userClothes.setClothes(clothes);
-        userClothes.setIsEquipped(true); // Equip immediately after purchase
+        userClothes.setStatus(ClothesStatus.EQUIPPED);
         userClothes.setPurchasedAt(LocalDateTime.now());
 
         return userClothesRepository.save(userClothes);
@@ -100,10 +101,11 @@ public class ClothesService {
         Clothes clothes = clothesRepository.findById(clothesId)
                 .orElseThrow(() -> new IllegalArgumentException("Clothes not found."));
 
-        UserClothes userClothes = userClothesRepository.findByPetAndClothesAndIsEquipped(pet, clothes, true)
+        UserClothes userClothes = userClothesRepository
+                .findByPetAndClothesAndStatus(pet, clothes, ClothesStatus.EQUIPPED)
                 .orElseThrow(() -> new IllegalArgumentException("현재 착용 중이지 않은 옷입니다."));
 
-        userClothes.setIsEquipped(false);
+        userClothes.setStatus(ClothesStatus.OWNED);
         return userClothesRepository.save(userClothes);
     }
 
@@ -113,6 +115,52 @@ public class ClothesService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
         Pet pet = petRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Pet not found for user."));
-        return userClothesRepository.findByPetAndIsEquipped(pet, true).stream().findFirst();
+        return userClothesRepository.findByPetAndStatus(pet, ClothesStatus.EQUIPPED).stream().findFirst();
     }
+
+    @Transactional(readOnly = true)
+    public List<ClothesResponse> getAllClothesWithStatus(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+        Pet pet = petRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Pet not found for user."));
+
+        List<Clothes> all = clothesRepository.findAll();
+        var statusByClothesId = userClothesRepository.findByPet(pet).stream()
+                .collect(Collectors.toMap(uc -> uc.getClothes().getId(), UserClothes::getStatus));
+
+        return all.stream().map(c ->
+            new ClothesResponse(
+                c.getId(),
+                c.getName(),
+                c.getPrice(),
+                c.getCategory(),
+                c.getImageUrl(),
+                c.getDescription(),
+                statusByClothesId.getOrDefault(c.getId(), ClothesStatus.NOT_OWNED)
+            )
+        ).toList();
+
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<ClothesResponse> getClothesById(Long userId, Long clothesId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+        Pet pet = petRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Pet not found for user."));
+
+        Clothes c = clothesRepository.findById(clothesId)
+                .orElseThrow(() -> new IllegalArgumentException("Clothes not found."));
+
+        ClothesStatus status = userClothesRepository.findByPetAndClothes(pet, c)
+                .map(UserClothes::getStatus)
+                .orElse(ClothesStatus.NOT_OWNED);
+
+        return Optional.of(new ClothesResponse(
+                c.getId(), c.getName(), c.getPrice(), c.getCategory(),
+                c.getImageUrl(), c.getDescription(), status
+        ));
+    }
+
 }
