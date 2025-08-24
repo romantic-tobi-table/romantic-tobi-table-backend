@@ -10,6 +10,7 @@ import com.tomy.tomy.repository.RewardRepository;
 import com.tomy.tomy.repository.UserRepository;
 import com.tomy.tomy.repository.UserRewardRepository;
 import com.tomy.tomy.repository.GreetingLogRepository;
+import com.tomy.tomy.repository.UserAchievementStatusRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ public class RewardService {
     private final PointService pointService;
     private final GreetingLogRepository greetingLogRepository;
     private final AchievementService achievementService;
+    private final UserAchievementStatusRepository userAchievementStatusRepository;
 
     @Transactional(readOnly = true)
     public List<UserReward> getUserRewards(Long userId) {
@@ -39,44 +41,70 @@ public class RewardService {
     }
 
     @Transactional
-    public UserReward redeemReward(Long userId, Long rewardId) {
+    public UserReward redeemGifticonByAchievement(Long userId, String rewardName) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
-        Reward reward = rewardRepository.findById(rewardId)
-                .orElseThrow(() -> new IllegalArgumentException("Reward not found."));
 
-        // Check if reward is active and in stock (if applicable)
-        if (!reward.getIsActive()) {
-            throw new IllegalArgumentException("비활성화된 리워드입니다.");
+        // Check achievement status
+        boolean canRedeem = false;
+        Long rewardValue = 0L;
+        String achievementType = ""; // Not strictly needed for redemption, but good for logging/tracking
+
+        switch (rewardName) {
+            case "ATTENDANCE_5000":
+                // Check if all 4 attendance achievements are completed
+                if (achievementService.areAllAttendanceAchievementsCompleted(user.getId())) {
+                    canRedeem = true;
+                    rewardValue = 5000L;
+                    achievementType = "ATTENDANCE";
+                }
+                break;
+            case "FEEDING_5000":
+                // Check if all 3 feeding achievements are completed
+                if (achievementService.areAllFeedingAchievementsCompleted(user.getId())) {
+                    canRedeem = true;
+                    rewardValue = 5000L;
+                    achievementType = "FEEDING";
+                }
+                break;
+            case "RECEIPT_5000":
+                // Check if all 3 receipt achievements are completed
+                if (achievementService.areAllReceiptAchievementsCompleted(user.getId())) {
+                    canRedeem = true;
+                    rewardValue = 5000L;
+                    achievementType = "RECEIPT";
+                }
+                break;
+            case "ALL_ACHIEVEMENTS_10000":
+                // Check if all achievements are completed
+                if (achievementService.areAllAchievementsCompleted(user.getId())) {
+                    canRedeem = true;
+                    rewardValue = 10000L;
+                    achievementType = "ALL";
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid reward name: " + rewardName);
         }
-        if (reward.getStock() != null && reward.getStock() <= 0) {
-            throw new IllegalArgumentException("리워드 재고가 부족합니다.");
+
+        if (!canRedeem) {
+            throw new IllegalArgumentException("업적 달성 조건이 충족되지 않았습니다.");
         }
 
-//        // Check if user already redeemed this specific reward and it's not reusable
-//        Optional<UserReward> existingUserReward = userRewardRepository.findByUserAndReward(user, reward);
-//        if (existingUserReward.isPresent() && existingUserReward.get().getUsed()) {
-//            throw new IllegalArgumentException("이미 사용한 리워드입니다.");
-//        }
-
-        // Spend points
-        pointService.spendPoints(user, reward.getCostPoint(), PointTransactionType.REWARD_REDEEM, "Reward redemption", reward.getId());
-
-        // Decrease stock if applicable
-        if (reward.getStock() != null) {
-            reward.setStock(reward.getStock() - 1);
-            rewardRepository.save(reward);
+        // Prevent duplicate redemption for the same achievement type
+        Optional<UserReward> existingUserReward = userRewardRepository.findByUserAndRewardName(user, rewardName);
+        if (existingUserReward.isPresent()) {
+            throw new IllegalArgumentException("이미 해당 업적으로 기프티콘을 받으셨습니다.");
         }
 
         UserReward userReward = new UserReward();
         userReward.setUser(user);
-        userReward.setReward(reward);
-        userReward.setUsed(true); // Mark as used upon redemption
+        userReward.setReward(null); // For achievement-based rewards, no direct Reward entity
+        userReward.setRewardName(rewardName); // Store the reward name directly
+        userReward.setValue(rewardValue.intValue()); // Set the value of the gifticon
+        userReward.setUsed(false); // Not used yet, just issued
         userReward.setIssuedAt(LocalDateTime.now());
-        userReward.setUsedAt(LocalDateTime.now()); // Mark used_at as now
-
-        // TODO: Generate actual gifticon code if applicable
-        userReward.setCode("GENERATED_GIFTICON_CODE");
+        userReward.setCode("GENERATED_GIFTICON_CODE_FOR_" + rewardName); // Generate a unique code
 
         return userRewardRepository.save(userReward);
     }
@@ -93,8 +121,8 @@ public class RewardService {
             throw new IllegalArgumentException("이미 인사를 하였습니다.");
         }
 
-        // Award greeting points (e.g., 100 points)
-        int greetingPoints = 100;
+        // Award greeting points (e.g., 10 points)
+        int greetingPoints = 10;
         pointService.earnPoints(user, greetingPoints, PointTransactionType.GREETING_REWARD, "Daily greeting", null);
 
         GreetingLog greetingLog = new GreetingLog();

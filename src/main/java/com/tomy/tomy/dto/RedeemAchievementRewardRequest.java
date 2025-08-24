@@ -5,7 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RedeemRewardRequest {
-    private Integer point;
-    private Boolean used;
+public class RedeemAchievementRewardRequest {
+    private String rewardName;
 }
