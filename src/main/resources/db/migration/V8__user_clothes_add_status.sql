@@ -14,3 +14,4 @@ DROP COLUMN is_equipped;
 
 -- 4) 조회 최적화(선택)
 CREATE INDEX idx_user_clothes_pet_status ON user_clothes (pet_id, status);
+

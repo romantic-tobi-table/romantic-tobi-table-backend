@@ -24,8 +24,14 @@ public class UserReward {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reward_id", nullable = false)
+    @JoinColumn(name = "reward_id", nullable = true)
     private Reward reward;
+
+    @Column(name = "reward_name")
+    private String rewardName; // To store the name of the achievement-based reward
+
+    @Column(name = "value")
+    private Integer value; // Value of the gifticon (e.g., 5000, 10000)
 
     @Column(nullable = false)
     private Boolean used;

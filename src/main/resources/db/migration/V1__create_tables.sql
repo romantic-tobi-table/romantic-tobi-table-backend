@@ -150,7 +150,9 @@ CREATE TABLE reward (
 CREATE TABLE user_reward (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    reward_id BIGINT NOT NULL,
+    reward_id BIGINT,
+    reward_name VARCHAR(255),
+    value INT,
     used BOOLEAN NOT NULL,
     code VARCHAR(128),
     issued_at DATETIME NOT NULL,

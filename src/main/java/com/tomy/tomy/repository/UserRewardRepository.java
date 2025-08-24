@@ -13,4 +13,5 @@ import java.util.Optional;
 public interface UserRewardRepository extends JpaRepository<UserReward, Long> {
     List<UserReward> findByUser(User user);
     Optional<UserReward> findByUserAndReward(User user, Reward reward);
+    Optional<UserReward> findByUserAndRewardName(User user, String rewardName);
 }

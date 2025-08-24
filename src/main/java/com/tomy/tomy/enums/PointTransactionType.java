@@ -6,6 +6,7 @@ public enum PointTransactionType {
     CLOTHES_BUY,
     REWARD_REDEEM,
     GREETING_REWARD,
+    ACHIEVEMENT_REWARD,
     ADJUST,
     LEVELUP_SPEND
 }
