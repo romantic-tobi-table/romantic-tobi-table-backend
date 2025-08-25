@@ -1,27 +1,21 @@
+# WARNING: This file contains sensitive information. Do not commit it to version control.
 spring:
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/tomy_db}
     username: ${DB_USER:tomy_app}
     password: ${DB_PASS:StrongPass!123}
   flyway:
-    clean-on-validation-error: false
-    clean-disabled: true
-    validate-on-migrate: true
+    clean-on-validation-error: true
+    clean-disabled: false
+    validate-on-migrate: false
     locations: classpath:db/migration
+gcp:
+  vision:
+    credentials: file:C:/Users/effor/Downloads/enduring-sign-436506-t5-c66b640c0776.json
 jwt:
-  secret: ${jwt_KEY}
+  secret: <jwt key>
   expiration-time: 86400000 # 24 hours in milliseconds
-
 # OpenAI API Key
 openai:
   api:
-    key: ${OPENAI_API_KEY}
-
-
-# Google Cloud Vision API Credentials
-gcp:
-  vision:
-    credentials: ${GCP_VISION_CREDENTIALS:file:/home/ec2-user/keys/gcp-vision.json}
-
-server:
-  port: 8080
+    key: <openai api key>
