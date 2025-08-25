@@ -81,7 +81,7 @@ public class ReceiptService {
         Optional<Store> exactMatch = storeRepository.findByName(parsedData.storeName());
         if (exactMatch.isPresent()) {
             // Check if address matches for exact name match
-            if (parsedData.address() != null && parsedData.address().contains(exactMatch.get().getAddress())) {
+            if (isAddressMatch(parsedData.address(), exactMatch.get().getAddress())) {
                 matchedStore = exactMatch.get();
             }
         }
@@ -90,7 +90,7 @@ public class ReceiptService {
             Page<Store> fuzzyMatchedStoresPage = storeRepository.findByNameContainingIgnoreCase(parsedData.storeName(), PageRequest.of(0, 5));
             List<Store> fuzzyMatchedStores = fuzzyMatchedStoresPage.getContent();
             for (Store store : fuzzyMatchedStores) {
-                if (parsedData.address() != null && parsedData.address().contains(store.getAddress())) {
+                if (isAddressMatch(parsedData.address(), store.getAddress())) {
                     matchedStore = store;
                     break;
                 }
@@ -131,5 +131,25 @@ public class ReceiptService {
         return receiptRepository.findAllByUser(user).stream()
                 .map(ReceiptCheckResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    private boolean isAddressMatch(String receiptAddress, String storeAddress) {
+        if (receiptAddress == null || storeAddress == null) {
+            return false;
+        }
+
+        String normalizedReceiptAddress = normalizeAddress(receiptAddress);
+        String normalizedStoreAddress = normalizeAddress(storeAddress);
+
+        return normalizedReceiptAddress.contains(normalizedStoreAddress);
+    }
+
+    private String normalizeAddress(String address) {
+        return address.replace("경북", "경상북도")
+                      .replace("경남", "경상남도")
+                      .replace("전북", "전라북도")
+                      .replace("전남", "전라남도")
+                      .replace("충북", "충청북도")
+                      .replace("충남", "충청남도");
     }
 }
